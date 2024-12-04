@@ -1,7 +1,23 @@
-```markdown
 # Flutter Shape Background
 
 A customizable Flutter package for creating animated and dynamic floating shapes as a background. Supports various shapes like circles, rectangles, triangles, and hearts with configurable properties like color, size, speed, and opacity.
+This widget also supports clean state changes so the drawn shapes stay in tact. Fe. It is possible to change the shape mid program and still it will continue to run smoothly with the new shape now spawning in.
+Here are some examples of how it works:
+
+### With circles selected and a background gradient added:
+
+<video src="https://github.com/user-attachments/assets/8bebd097-e955-45c8-a22f-14add1d354f5.mp4" autoplay loop muted playsinline>
+Your browser does not support the video tag.
+</video>
+
+### With hearts selected and a background gradient added:
+
+<video src="https://github.com/user-attachments/assets/7c2bdcf1-b0b0-4b50-9119-60e944bcacaf.mp4" autoplay loop muted playsinline>
+Your browser does not support the video tag.
+</video>
+
+
+
 
 ## Features
 
@@ -18,11 +34,11 @@ Add the following line to your `pubspec.yaml` file:
 ```yaml
 dependencies:
   flutter_shape_background: ^1.0.0
-```
+
 
 Run the command to fetch the package:
 
-```bash
+
 flutter pub get flutter_shape_background: ^1.0.0
 ```
 
@@ -91,7 +107,7 @@ ShapeBackground(
 - **Speed**: Adjust the `speedMultiplier` property to control the speed of the shapes.
 - **Size**: The size of the shapes is randomly generated within a range, which you can adjust in the source.
 
-## API Reference
+## Reference
 
 ### ShapeBackground
 
@@ -134,5 +150,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ## Support
 
-If you encounter any issues or have questions, feel free to open an issue on the [GitHub repository](https://github.com/your-repo/flutter_shape_background).
-```
+If you encounter any issues or have questions, feel free to open an issue on the [GitHub repository](https://github.com/NoirsCodingCorner/floating_animation/).
