@@ -6,15 +6,12 @@ Here are some examples of how it works:
 
 ### With circles selected and a background gradient added:
 
-<video src="https://github.com/user-attachments/assets/8bebd097-e955-45c8-a22f-14add1d354f5.mp4" autoplay loop muted playsinline>
-Your browser does not support the video tag.
-</video>
+![Floating circles](https://github.com/user-attachments/assets/fcee9416-7ca5-415a-9b24-ddcbf21486a0)
+
 
 ### With hearts selected and a background gradient added:
 
-<video src="https://github.com/user-attachments/assets/7c2bdcf1-b0b0-4b50-9119-60e944bcacaf.mp4" autoplay loop muted playsinline>
-Your browser does not support the video tag.
-</video>
+![Floating hearts](https://github.com/user-attachments/assets/d8e30d0b-c5b5-4b39-9674-766e33ff0cd0)
 
 
 
