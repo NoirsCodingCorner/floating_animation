@@ -1,10 +1,10 @@
 name: floating_animation
 description: "Beautiful ready to use widget for smooth floating animation."
 version: 1.0.0
-homepage:
+homepage: https://github.com/NoirsCodingCorner/floating_animation
 
 environment:
-  sdk: ^3.7.0-118.0.dev
+  sdk: ">=2.17.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
