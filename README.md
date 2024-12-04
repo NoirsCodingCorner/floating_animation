@@ -30,13 +30,13 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_shape_background: ^1.0.0
+  flutter_shape_background: ^1.0.1
 
 
 Run the command to fetch the package:
 
 
-flutter pub get flutter_shape_background: ^1.0.0
+flutter pub get flutter_shape_background: ^1.0.1
 ```
 
 ## Usage
