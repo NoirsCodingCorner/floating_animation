@@ -1,20 +1,20 @@
 # Flutter Shape Background
 
 A customizable Flutter package for creating animated and dynamic floating shapes as a background. Supports various shapes like circles, rectangles, triangles, and hearts with configurable properties like color, size, speed, and opacity.
-This widget also supports clean state changes so the drawn shapes stay in tact. Fe. It is possible to change the shape mid program and still it will continue to run smoothly with the new shape now spawning in.
+
+This widget also supports seamless state changes, allowing the shapes to adapt dynamically without disrupting the animation. For example, you can change the shape mid-program, and the widget will continue running smoothly with the newly selected shape.
+
 Here are some examples of how it works:
 
-### With circles selected and a background gradient added:
+### Circles with a background gradient:
 
 ![Floating circles](https://github.com/user-attachments/assets/fcee9416-7ca5-415a-9b24-ddcbf21486a0)
 
-
-### With hearts selected and a background gradient added:
+### Hearts with a background gradient:
 
 ![Floating hearts](https://github.com/user-attachments/assets/d8e30d0b-c5b5-4b39-9674-766e33ff0cd0)
 
-
-
+---
 
 ## Features
 
@@ -22,7 +22,10 @@ Here are some examples of how it works:
 - **Customizable Colors**: Define unique colors for each shape type.
 - **Dynamic Animations**: Shapes float upwards with customizable speed and size.
 - **Layered Depth**: Shapes render in layers based on their depth value.
+- **Seamless Transitions**: Change properties on-the-fly without interrupting the animation.
 - **Scalable Design**: Automatically adjusts to different screen sizes.
+
+---
 
 ## Installation
 
@@ -30,14 +33,16 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_shape_background: ^1.0.1
-
+  floating_animation: ^1.0.1
+```
 
 Run the command to fetch the package:
 
-
-flutter pub get flutter_shape_background: ^1.0.1
+```bash
+flutter pub get
 ```
+
+---
 
 ## Usage
 
@@ -45,7 +50,7 @@ flutter pub get flutter_shape_background: ^1.0.1
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_shape_background/flutter_shape_background.dart';
+import 'package:floating_animation/floating_animation.dart';
 
 void main() {
   runApp(ShapeFloatingApp());
@@ -57,7 +62,7 @@ class ShapeFloatingApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text('Floating Shapes')),
-        body: ShapeBackground(
+        body: FloatingAnimation(
           maxShapes: 50,
           speedMultiplier: 1.0,
           selectedShape: 'circle',
@@ -74,11 +79,14 @@ class ShapeFloatingApp extends StatelessWidget {
 }
 ```
 
+---
+
 ### Customization
 
 #### Shape Types
 
 You can specify the type of shapes to render using the `selectedShape` property. Supported values are:
+
 - `circle`
 - `rectangle`
 - `triangle`
@@ -86,10 +94,10 @@ You can specify the type of shapes to render using the `selectedShape` property.
 
 #### Colors
 
-Use the `shapeColors` property to define custom colors for each shape type.
+Use the `shapeColors` property to define custom colors for each shape type:
 
 ```dart
-ShapeBackground(
+FloatingAnimation(
   shapeColors: {
     'circle': Colors.orange,
     'rectangle': Colors.teal,
@@ -101,21 +109,23 @@ ShapeBackground(
 
 #### Speed and Size
 
-- **Speed**: Adjust the `speedMultiplier` property to control the speed of the shapes.
-- **Size**: The size of the shapes is randomly generated within a range, which you can adjust in the source.
+- **Speed**: Adjust the `speedMultiplier` property to control the overall speed of the shapes.
+- **Size**: Shape sizes are randomized within a range, scaled based on depth for a layered effect.
+
+---
 
 ## Reference
 
-### ShapeBackground
+### FloatingAnimation Properties
 
-| Property         | Type                       | Default             | Description                                     |
-|------------------|----------------------------|---------------------|-------------------------------------------------|
-| `maxShapes`      | `int`                     | `50`                | Maximum number of shapes on the screen.        |
-| `speedMultiplier`| `double`                  | `1.0`               | Adjusts the overall speed of the shapes.       |
-| `selectedShape`  | `String`                  | `'circle'`          | Type of shape to generate.                     |
-| `shapeColors`    | `Map<String, Color>`      | See example above.  | Defines colors for each shape type.            |
+| Property         | Type                  | Default             | Description                                      |
+|------------------|-----------------------|---------------------|--------------------------------------------------|
+| `maxShapes`      | `int`                | `50`                | Maximum number of shapes on the screen.         |
+| `speedMultiplier`| `double`             | `1.0`               | Adjusts the overall speed of the shapes.        |
+| `selectedShape`  | `String`             | `'circle'`          | Type of shape to generate.                      |
+| `shapeColors`    | `Map<String, Color>` | See example above.  | Defines colors for each shape type.             |
 
-### Shape
+### Shape Properties
 
 | Property  | Type    | Description                                   |
 |-----------|---------|-----------------------------------------------|
@@ -127,11 +137,15 @@ ShapeBackground(
 | `depth`   | `double`| Depth of the shape (0.0 to 1.0).             |
 | `shape`   | `String`| Type of the shape (e.g., 'circle').          |
 
+---
+
 ## Example Use Cases
 
 - Floating bubbles in a background.
 - Themed animations for holidays (e.g., hearts for Valentine's Day).
 - Customizable visual effects for Flutter apps.
+
+---
 
 ## Contributing
 
@@ -141,9 +155,13 @@ Contributions are welcome! Please follow these steps:
 2. Create a new branch for your feature or bug fix.
 3. Submit a pull request.
 
+---
+
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+---
 
 ## Support
 
