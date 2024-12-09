@@ -1,15 +1,19 @@
+// floating_animation.dart
 import 'dart:math';
-
-import 'package:floating_animation/shape.dart';
-import 'package:floating_animation/shape_painter.dart';
 import 'package:flutter/material.dart';
+import 'shape.dart';
+import 'shape_painter.dart';
 
+/// Enum to define the direction of floating shapes.
+enum FloatingDirection {
+  up,    // Shapes float from bottom to top.
+  down,  // Shapes float from top to bottom.
+}
 
 /// A [StatefulWidget] that manages and animates a background of floating shapes.
 ///
 /// The [FloatingAnimation] widget continuously generates shapes that float
-/// upwards across the screen. It handles the lifecycle of shapes, including
-/// their creation, movement, and removal once they move off-screen.
+/// either upwards or downwards across the screen based on the [direction].
 class FloatingAnimation extends StatefulWidget {
   /// The maximum number of shapes allowed on the screen at any given time.
   final int maxShapes;
@@ -26,11 +30,13 @@ class FloatingAnimation extends StatefulWidget {
   /// If a shape type is not specified in this map, it defaults to [Colors.white].
   final Map<String, Color> shapeColors;
 
+  /// The direction in which shapes float.
+  final FloatingDirection direction;
+
   /// Constructs a [FloatingAnimation] with the given parameters.
   ///
-  /// [maxShapes], [speedMultiplier], [selectedShape], and [shapeColors] are optional
-  /// and have default values if not provided.
-  /// thr available shapes are 'circle', 'rectangle', 'triangle', and 'heart'.
+  /// [maxShapes], [speedMultiplier], [selectedShape], [shapeColors], and [direction]
+  /// are optional and have default values if not provided.
   const FloatingAnimation({
     Key? key,
     this.maxShapes = 50,
@@ -42,6 +48,7 @@ class FloatingAnimation extends StatefulWidget {
       'heart': Colors.red,
       'triangle': Colors.purple,
     }, // Default colors
+    this.direction = FloatingDirection.up, // Default direction
   }) : super(key: key);
 
   @override
@@ -100,9 +107,12 @@ class _FloatingAnimationState extends State<FloatingAnimation>
       double opacity = 0.8 - (0.5 * depth);
       double radius = (_random.nextDouble() * 20 + 10) * (1 - depth * 0.5);
 
+      // Determine the starting y position based on the direction
+      double startY = widget.direction == FloatingDirection.up ? 1.0 : -0.1;
+
       Shape newShape = Shape(
         x: _random.nextDouble(),
-        y: 1.0, // Start at the bottom (normalized)
+        y: startY, // Start at bottom or top
         radius: radius,
         speed: speed,
         opacity: opacity,
@@ -124,7 +134,7 @@ class _FloatingAnimationState extends State<FloatingAnimation>
 
   /// Updates the positions of all shapes based on their speed and elapsed time.
   ///
-  /// Removes shapes that have moved above the top of the screen.
+  /// Removes shapes that have moved off-screen based on the direction.
   void _updateShapes() {
     if (_isDisposed) return;
 
@@ -137,8 +147,15 @@ class _FloatingAnimationState extends State<FloatingAnimation>
     }
 
     List<Shape> updatedShapes = _shapes.value.map((shape) {
-      // Update the y position based on speed and deltaTime
-      double newY = shape.y - shape.speed * deltaTime;
+      double newY;
+
+      if (widget.direction == FloatingDirection.up) {
+        // Move upwards
+        newY = shape.y - shape.speed * deltaTime;
+      } else {
+        // Move downwards
+        newY = shape.y + shape.speed * deltaTime;
+      }
 
       // Optionally, update rotation or other properties here
 
@@ -153,8 +170,12 @@ class _FloatingAnimationState extends State<FloatingAnimation>
       );
     }).toList();
 
-    // Remove shapes that have moved above the top of the screen
-    updatedShapes.removeWhere((shape) => shape.y < -0.1);
+    // Remove shapes that have moved off-screen based on direction
+    if (widget.direction == FloatingDirection.up) {
+      updatedShapes.removeWhere((shape) => shape.y < -0.1);
+    } else {
+      updatedShapes.removeWhere((shape) => shape.y > 1.1);
+    }
 
     if (!_isDisposed) {
       _shapes.value = updatedShapes;

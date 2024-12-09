@@ -1,7 +1,7 @@
+// shape_painter.dart
 import 'dart:math';
-
-import 'package:floating_animation/shape.dart';
 import 'package:flutter/material.dart';
+import 'shape.dart';
 
 /// A [CustomPainter] that draws a list of [Shape] instances on the canvas.
 ///
