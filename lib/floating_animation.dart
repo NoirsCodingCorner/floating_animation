@@ -21,6 +21,11 @@ class FloatingAnimation extends StatefulWidget {
   /// A multiplier to adjust the speed of the shapes.
   final double speedMultiplier;
 
+  /// A multiplier to adjust the size of the shapes.
+  ///
+  /// Values greater than 1.0 will enlarge the shapes, while values less than 1.0 will reduce their size.
+  final double sizeMultiplier;
+
   /// The type of shape to generate ('circle', 'rectangle', 'triangle', 'heart', etc.).
   final String selectedShape;
 
@@ -35,12 +40,13 @@ class FloatingAnimation extends StatefulWidget {
 
   /// Constructs a [FloatingAnimation] with the given parameters.
   ///
-  /// [maxShapes], [speedMultiplier], [selectedShape], [shapeColors], and [direction]
+  /// [maxShapes], [speedMultiplier], [sizeMultiplier], [selectedShape], [shapeColors], and [direction]
   /// are optional and have default values if not provided.
   const FloatingAnimation({
     Key? key,
     this.maxShapes = 50,
     this.speedMultiplier = 1.0,
+    this.sizeMultiplier = 1.0,
     this.selectedShape = 'circle',
     this.shapeColors = const {
       'circle': Colors.blue,
@@ -105,7 +111,8 @@ class _FloatingAnimationState extends State<FloatingAnimation>
       double depth = _random.nextDouble(); // Determines z-ordering
       double speed = (0.2 - (0.15 * depth)) * widget.speedMultiplier;
       double opacity = 0.8 - (0.5 * depth);
-      double radius = (_random.nextDouble() * 20 + 10) * (1 - depth * 0.5);
+      double baseRadius = _random.nextDouble() * 20 + 10; // Base size between 10 and 30
+      double radius = baseRadius * widget.sizeMultiplier * (1 - depth * 0.5);
 
       // Determine the starting y position based on the direction
       double startY = widget.direction == FloatingDirection.up ? 1.0 : -0.1;

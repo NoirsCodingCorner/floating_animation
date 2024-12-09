@@ -13,3 +13,7 @@ Changed the documentation to accurately reflect the way on how to use it
 ## 1.0.3
 
 Added a direction enum to make it possible to make it go from button to top
+
+## 1.0.4
+
+Added so now the size and direction can be adjusted
