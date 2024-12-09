@@ -38,10 +38,16 @@ class FloatingAnimation extends StatefulWidget {
   /// The direction in which shapes float.
   final FloatingDirection direction;
 
+  /// The rate at which shapes spawn, defined as shapes per second.
+  ///
+  /// Higher values result in more frequent shape generation.
+  /// The default value is 10.0 shapes per second.
+  final double spawnRate;
+
   /// Constructs a [FloatingAnimation] with the given parameters.
   ///
-  /// [maxShapes], [speedMultiplier], [sizeMultiplier], [selectedShape], [shapeColors], and [direction]
-  /// are optional and have default values if not provided.
+  /// [maxShapes], [speedMultiplier], [sizeMultiplier], [selectedShape], [shapeColors],
+  /// [direction], and [spawnRate] are optional and have default values if not provided.
   const FloatingAnimation({
     Key? key,
     this.maxShapes = 50,
@@ -55,6 +61,7 @@ class FloatingAnimation extends StatefulWidget {
       'triangle': Colors.purple,
     }, // Default colors
     this.direction = FloatingDirection.up, // Default direction
+    this.spawnRate = 10.0, // Default spawn rate
   }) : super(key: key);
 
   @override
@@ -102,8 +109,8 @@ class _FloatingAnimationState extends State<FloatingAnimation>
 
   /// Generates a new shape and adds it to the list if the maximum is not reached.
   ///
-  /// This method schedules itself to run again after a random delay, creating
-  /// a continuous stream of shapes being added.
+  /// This method schedules itself to run again after a delay determined by [spawnRate],
+  /// creating a continuous stream of shapes being added.
   void _generateShape() {
     if (_isDisposed) return;
 
@@ -132,9 +139,17 @@ class _FloatingAnimationState extends State<FloatingAnimation>
       }
     }
 
-    // Schedule the next shape addition after a random delay
+    // Calculate the delay based on spawnRate
+    // spawnRate = shapes per second => delay between spawns = 1000ms / spawnRate
+    // Adding some randomness to the delay
+    double baseDelayMs = 1000.0 / widget.spawnRate;
+    // Random delay between 80% and 120% of baseDelayMs
+    double randomFactor = 0.8 + _random.nextDouble() * 0.4;
+    int delayMs = (baseDelayMs * randomFactor).round();
+
+    // Schedule the next shape addition after the calculated delay
     Future.delayed(
-      Duration(milliseconds: _random.nextInt(80) + 20),
+      Duration(milliseconds: delayMs),
       _generateShape,
     );
   }
@@ -142,53 +157,53 @@ class _FloatingAnimationState extends State<FloatingAnimation>
   /// Updates the positions of all shapes based on their speed and elapsed time.
   ///
   /// Removes shapes that have moved off-screen based on the direction.
-  void _updateShapes() {
-    if (_isDisposed) return;
+  void _updateShapes()
+  {
+  if (_isDisposed) return;
 
-    DateTime now = DateTime.now();
-    double deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
-    _lastUpdateTime = now;
+  DateTime now = DateTime.now();
+  double deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
+  _lastUpdateTime = now;
 
-    if (deltaTime > 0.1) {
-      deltaTime = 0.1; // Cap deltaTime to prevent large jumps
-    }
-
-    List<Shape> updatedShapes = _shapes.value.map((shape) {
-      double newY;
-
-      if (widget.direction == FloatingDirection.up) {
-        // Move upwards
-        newY = shape.y - shape.speed * deltaTime;
-      } else {
-        // Move downwards
-        newY = shape.y + shape.speed * deltaTime;
-      }
-
-      // Optionally, update rotation or other properties here
-
-      return Shape(
-        shape: shape.shape,
-        x: shape.x,
-        y: newY,
-        radius: shape.radius,
-        speed: shape.speed,
-        opacity: shape.opacity,
-        depth: shape.depth,
-      );
-    }).toList();
-
-    // Remove shapes that have moved off-screen based on direction
-    if (widget.direction == FloatingDirection.up) {
-      updatedShapes.removeWhere((shape) => shape.y < -0.1);
-    } else {
-      updatedShapes.removeWhere((shape) => shape.y > 1.1);
-    }
-
-    if (!_isDisposed) {
-      _shapes.value = updatedShapes;
-    }
+  if (deltaTime > 0.1) {
+  deltaTime = 0.1; // Cap deltaTime to prevent large jumps
   }
 
+  List<Shape> updatedShapes = _shapes.value.map((shape) {
+  double newY;
+
+  if (widget.direction == FloatingDirection.up) {
+  // Move upwards
+  newY = shape.y - shape.speed * deltaTime;
+  } else {
+  // Move downwards
+  newY = shape.y + shape.speed * deltaTime;
+  }
+
+  // Optionally, update rotation or other properties here
+
+  return Shape(
+  shape: shape.shape,
+  x: shape.x,
+  y: newY,
+  radius: shape.radius,
+  speed: shape.speed,
+  opacity: shape.opacity,
+  depth: shape.depth,
+  );
+  }).toList();
+
+  // Remove shapes that have moved off-screen based on direction
+  if (widget.direction == FloatingDirection.up) {
+  updatedShapes.removeWhere((shape) => shape.y < -0.1);
+  } else {
+  updatedShapes.removeWhere((shape) => shape.y > 1.1);
+  }
+
+  if (!_isDisposed) {
+  _shapes.value = updatedShapes;
+  }
+  }
   /// Builds the widget tree with a [CustomPaint] widget to render shapes.
   ///
   /// Uses a [ValueListenableBuilder] to listen to changes in the shape list
