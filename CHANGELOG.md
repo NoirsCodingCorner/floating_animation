@@ -21,3 +21,7 @@ Added so now the size and direction can be adjusted
 ## 1.0.5
 
 Made it possible to adjust the spawn rate
+
+## 1.0.6
+
+Updated the readme
