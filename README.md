@@ -14,6 +14,11 @@ Here are some examples of how it works:
 
 ![Floating hearts](https://github.com/user-attachments/assets/d8e30d0b-c5b5-4b39-9674-766e33ff0cd0)
 
+### Raining with a background gradient:
+
+![Recording2024-12-11165702-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/5b7daad7-1b78-4526-9b0b-00d056327754)
+
+
 ---
 
 ## Features
