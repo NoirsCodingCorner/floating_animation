@@ -1,8 +1,14 @@
 // floating_animation.dart
+
+library floating_animation;
+
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'shape.dart';
-import 'shape_painter.dart';
+import 'src/shape.dart';
+import 'src/shape_painter.dart';
+
+export 'src/shape_painter.dart';
+export 'src/shape.dart';
 
 /// Enum to define the direction of floating shapes.
 enum FloatingDirection {
@@ -49,7 +55,7 @@ class FloatingAnimation extends StatefulWidget {
   /// [maxShapes], [speedMultiplier], [sizeMultiplier], [selectedShape], [shapeColors],
   /// [direction], and [spawnRate] are optional and have default values if not provided.
   const FloatingAnimation({
-    Key? key,
+    super.key,
     this.maxShapes = 50,
     this.speedMultiplier = 1.0,
     this.sizeMultiplier = 1.0,
@@ -62,13 +68,13 @@ class FloatingAnimation extends StatefulWidget {
     }, // Default colors
     this.direction = FloatingDirection.up, // Default direction
     this.spawnRate = 10.0, // Default spawn rate
-  }) : super(key: key);
+  });
 
   @override
-  _FloatingAnimationState createState() => _FloatingAnimationState();
+  FloatingAnimationState createState() => FloatingAnimationState();
 }
 
-class _FloatingAnimationState extends State<FloatingAnimation>
+class FloatingAnimationState extends State<FloatingAnimation>
     with SingleTickerProviderStateMixin {
   /// A [ValueNotifier] that holds the current list of shapes.
   final ValueNotifier<List<Shape>> _shapes = ValueNotifier<List<Shape>>([]);
@@ -210,17 +216,19 @@ class _FloatingAnimationState extends State<FloatingAnimation>
   /// and trigger repaints accordingly.
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<Shape>>(
-      valueListenable: _shapes,
-      builder: (context, shapes, child) {
-        return CustomPaint(
-          painter: ShapePainter(
-            shapes: shapes,
-            shapeColors: widget.shapeColors, // Pass the color map to the painter
-          ),
-          child: Container(),
-        );
-      },
+    return IgnorePointer(
+      child: ValueListenableBuilder<List<Shape>>(
+        valueListenable: _shapes,
+        builder: (context, shapes, child) {
+          return CustomPaint(
+            painter: ShapePainter(
+              shapes: shapes,
+              shapeColors: widget.shapeColors, // Pass the color map to the painter
+            ),
+            child: Container(),
+          );
+        },
+      ),
     );
   }
 }

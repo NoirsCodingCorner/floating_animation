@@ -41,8 +41,7 @@ class ShapePainter extends CustomPainter {
     for (Shape shape in drawingShapes) {
       // Retrieve the color for the current shape type.
       // Defaults to white if the shape type is not specified.
-      paint.color =
-          (shapeColors[shape.shape] ?? Colors.white).withOpacity(shape.opacity);
+      paint.color = (shapeColors[shape.shape] ?? Colors.white).withAlpha((shape.opacity * 255).toInt());
 
       // Calculate the actual position based on normalized coordinates.
       final double dx = shape.x * size.width;
