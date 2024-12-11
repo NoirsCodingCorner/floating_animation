@@ -28,14 +28,14 @@ class FloatingBubbles extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.cyanAccent,
-                    Colors.cyan.shade300,
-                    Colors.indigoAccent.shade100
-                  ],
-                )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.cyanAccent,
+                Colors.cyan.shade300,
+                Colors.indigoAccent.shade100
+              ],
+            )),
           ),
           FloatingAnimation(
             maxShapes: 50,

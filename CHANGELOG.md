@@ -25,3 +25,7 @@ Made it possible to adjust the spawn rate
 ## 1.0.6
 
 Updated the readme
+
+## 1.0.7
+
+Made it click-through

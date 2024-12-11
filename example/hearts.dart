@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:floating_animation/floating_animation.dart';
+
 void main() {
   runApp(HeartsApp());
 }
@@ -27,15 +28,14 @@ class FloatingHearts extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.purpleAccent.shade100,
-                    Colors.pinkAccent.shade100,
-                    Colors.red.shade100
-                  ],
-                )
-            ),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.purpleAccent.shade100,
+                Colors.pinkAccent.shade100,
+                Colors.red.shade100
+              ],
+            )),
           ),
           FloatingAnimation(
             maxShapes: 50,
@@ -43,7 +43,8 @@ class FloatingHearts extends StatelessWidget {
             shapeColors: {
               "circle": Colors.blue,
               "rectangle": Colors.green,
-              "heart": Colors.red.shade900,},
+              "heart": Colors.red.shade900,
+            },
           )
         ],
       ),

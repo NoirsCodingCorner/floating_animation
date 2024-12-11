@@ -28,14 +28,14 @@ class FallingRain extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.grey,
-                    Colors.blueGrey,
-                    Colors.indigoAccent.shade100
-                  ],
-                )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.grey,
+                Colors.blueGrey,
+                Colors.indigoAccent.shade100
+              ],
+            )),
           ),
           FloatingAnimation(
             maxShapes: 200,

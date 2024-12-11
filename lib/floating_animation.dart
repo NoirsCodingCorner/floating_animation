@@ -12,8 +12,8 @@ export 'src/shape.dart';
 
 /// Enum to define the direction of floating shapes.
 enum FloatingDirection {
-  up,    // Shapes float from bottom to top.
-  down,  // Shapes float from top to bottom.
+  up, // Shapes float from bottom to top.
+  down, // Shapes float from top to bottom.
 }
 
 /// A [StatefulWidget] that manages and animates a background of floating shapes.
@@ -124,7 +124,8 @@ class FloatingAnimationState extends State<FloatingAnimation>
       double depth = _random.nextDouble(); // Determines z-ordering
       double speed = (0.2 - (0.15 * depth)) * widget.speedMultiplier;
       double opacity = 0.8 - (0.5 * depth);
-      double baseRadius = _random.nextDouble() * 20 + 10; // Base size between 10 and 30
+      double baseRadius =
+          _random.nextDouble() * 20 + 10; // Base size between 10 and 30
       double radius = baseRadius * widget.sizeMultiplier * (1 - depth * 0.5);
 
       // Determine the starting y position based on the direction
@@ -163,53 +164,53 @@ class FloatingAnimationState extends State<FloatingAnimation>
   /// Updates the positions of all shapes based on their speed and elapsed time.
   ///
   /// Removes shapes that have moved off-screen based on the direction.
-  void _updateShapes()
-  {
-  if (_isDisposed) return;
+  void _updateShapes() {
+    if (_isDisposed) return;
 
-  DateTime now = DateTime.now();
-  double deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
-  _lastUpdateTime = now;
+    DateTime now = DateTime.now();
+    double deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
+    _lastUpdateTime = now;
 
-  if (deltaTime > 0.1) {
-  deltaTime = 0.1; // Cap deltaTime to prevent large jumps
+    if (deltaTime > 0.1) {
+      deltaTime = 0.1; // Cap deltaTime to prevent large jumps
+    }
+
+    List<Shape> updatedShapes = _shapes.value.map((shape) {
+      double newY;
+
+      if (widget.direction == FloatingDirection.up) {
+        // Move upwards
+        newY = shape.y - shape.speed * deltaTime;
+      } else {
+        // Move downwards
+        newY = shape.y + shape.speed * deltaTime;
+      }
+
+      // Optionally, update rotation or other properties here
+
+      return Shape(
+        shape: shape.shape,
+        x: shape.x,
+        y: newY,
+        radius: shape.radius,
+        speed: shape.speed,
+        opacity: shape.opacity,
+        depth: shape.depth,
+      );
+    }).toList();
+
+    // Remove shapes that have moved off-screen based on direction
+    if (widget.direction == FloatingDirection.up) {
+      updatedShapes.removeWhere((shape) => shape.y < -0.1);
+    } else {
+      updatedShapes.removeWhere((shape) => shape.y > 1.1);
+    }
+
+    if (!_isDisposed) {
+      _shapes.value = updatedShapes;
+    }
   }
 
-  List<Shape> updatedShapes = _shapes.value.map((shape) {
-  double newY;
-
-  if (widget.direction == FloatingDirection.up) {
-  // Move upwards
-  newY = shape.y - shape.speed * deltaTime;
-  } else {
-  // Move downwards
-  newY = shape.y + shape.speed * deltaTime;
-  }
-
-  // Optionally, update rotation or other properties here
-
-  return Shape(
-  shape: shape.shape,
-  x: shape.x,
-  y: newY,
-  radius: shape.radius,
-  speed: shape.speed,
-  opacity: shape.opacity,
-  depth: shape.depth,
-  );
-  }).toList();
-
-  // Remove shapes that have moved off-screen based on direction
-  if (widget.direction == FloatingDirection.up) {
-  updatedShapes.removeWhere((shape) => shape.y < -0.1);
-  } else {
-  updatedShapes.removeWhere((shape) => shape.y > 1.1);
-  }
-
-  if (!_isDisposed) {
-  _shapes.value = updatedShapes;
-  }
-  }
   /// Builds the widget tree with a [CustomPaint] widget to render shapes.
   ///
   /// Uses a [ValueListenableBuilder] to listen to changes in the shape list
@@ -223,7 +224,8 @@ class FloatingAnimationState extends State<FloatingAnimation>
           return CustomPaint(
             painter: ShapePainter(
               shapes: shapes,
-              shapeColors: widget.shapeColors, // Pass the color map to the painter
+              shapeColors:
+                  widget.shapeColors, // Pass the color map to the painter
             ),
             child: Container(),
           );

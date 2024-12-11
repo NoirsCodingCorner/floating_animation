@@ -41,7 +41,7 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floating_animation: ^1.0.1
+  floating_animation: ^1.0.7
 ```
 
 Run the command to fetch the package:

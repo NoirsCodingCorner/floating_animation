@@ -41,7 +41,8 @@ class ShapePainter extends CustomPainter {
     for (Shape shape in drawingShapes) {
       // Retrieve the color for the current shape type.
       // Defaults to white if the shape type is not specified.
-      paint.color = (shapeColors[shape.shape] ?? Colors.white).withAlpha((shape.opacity * 255).toInt());
+      paint.color = (shapeColors[shape.shape] ?? Colors.white)
+          .withAlpha((shape.opacity * 255).toInt());
 
       // Calculate the actual position based on normalized coordinates.
       final double dx = shape.x * size.width;
@@ -65,7 +66,7 @@ class ShapePainter extends CustomPainter {
           break;
 
         default:
-        // Optionally handle unknown shapes
+          // Optionally handle unknown shapes
           break;
       }
     }
@@ -83,8 +84,7 @@ class ShapePainter extends CustomPainter {
   /// The [size] parameter is used for both width and height, making it a square.
   /// Use different logic if you need non-square rectangles.
   void _drawRectangle(Canvas canvas, Offset topLeft, double size, Paint paint) {
-    canvas.drawRect(
-        Rect.fromLTWH(topLeft.dx, topLeft.dy, size, size), paint);
+    canvas.drawRect(Rect.fromLTWH(topLeft.dx, topLeft.dy, size, size), paint);
   }
 
   /// Draws a triangle on the [canvas] at the given [center] with the specified [size].
