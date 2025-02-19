@@ -1,6 +1,6 @@
 // main.dart
 import 'package:flutter/material.dart';
-import 'package:floating_animation/floating_animation.dart';
+import 'package:floating_animation/src/floating_animation.dart';
 
 void main() {
   runApp(BubblesApp());
