@@ -7,53 +7,32 @@ import 'package:flutter/material.dart';
 import 'src/shape.dart';
 import 'src/shape_painter.dart';
 
-export 'src/shape_painter.dart';
 export 'src/shape.dart';
+export 'src/shape_painter.dart';
 
 /// Enum to define the direction of floating shapes.
-enum FloatingDirection {
-  up, // Shapes float from bottom to top.
-  down, // Shapes float from top to bottom.
-}
+enum FloatingDirection { up, down }
 
-/// A [StatefulWidget] that manages and animates a background of floating shapes.
-///
-/// The [FloatingAnimation] widget continuously generates shapes that float
-/// either upwards or downwards across the screen based on the [direction].
+/// A StatefulWidget that manages and animates a background of floating shapes.
+/// In addition to basic movement, it can optionally rotate and pulse the shapes.
 class FloatingAnimation extends StatefulWidget {
-  /// The maximum number of shapes allowed on the screen at any given time.
   final int maxShapes;
-
-  /// A multiplier to adjust the speed of the shapes.
   final double speedMultiplier;
-
-  /// A multiplier to adjust the size of the shapes.
-  ///
-  /// Values greater than 1.0 will enlarge the shapes, while values less than 1.0 will reduce their size.
   final double sizeMultiplier;
-
-  /// The type of shape to generate ('circle', 'rectangle', 'triangle', 'heart', etc.).
   final String selectedShape;
-
-  /// A map defining customizable colors for each shape type.
-  ///
-  /// The key is the shape type as a string, and the value is the corresponding [Color].
-  /// If a shape type is not specified in this map, it defaults to [Colors.white].
   final Map<String, Color> shapeColors;
-
-  /// The direction in which shapes float.
   final FloatingDirection direction;
-
-  /// The rate at which shapes spawn, defined as shapes per second.
-  ///
-  /// Higher values result in more frequent shape generation.
-  /// The default value is 10.0 shapes per second.
   final double spawnRate;
+  final IconData? icon;
+  final void Function(Canvas, Offset, double, Paint)? customPaintMethod;
 
-  /// Constructs a [FloatingAnimation] with the given parameters.
-  ///
-  /// [maxShapes], [speedMultiplier], [sizeMultiplier], [selectedShape], [shapeColors],
-  /// [direction], and [spawnRate] are optional and have default values if not provided.
+  // New transformation parameters:
+  final bool enableRotation;
+  final double rotationSpeedMultiplier;
+  final bool enablePulse;
+  final double pulseSpeed;
+  final double pulseAmplitude;
+
   const FloatingAnimation({
     super.key,
     this.maxShapes = 50,
@@ -65,9 +44,16 @@ class FloatingAnimation extends StatefulWidget {
       'rectangle': Colors.green,
       'heart': Colors.red,
       'triangle': Colors.purple,
-    }, // Default colors
-    this.direction = FloatingDirection.up, // Default direction
-    this.spawnRate = 10.0, // Default spawn rate
+    },
+    this.direction = FloatingDirection.up,
+    this.spawnRate = 10.0,
+    this.icon,
+    this.customPaintMethod,
+    this.enableRotation = false,
+    this.rotationSpeedMultiplier = 1.0,
+    this.enablePulse = false,
+    this.pulseSpeed = 2.0,
+    this.pulseAmplitude = 0.3,
   });
 
   @override
@@ -76,22 +62,12 @@ class FloatingAnimation extends StatefulWidget {
 
 class FloatingAnimationState extends State<FloatingAnimation>
     with SingleTickerProviderStateMixin {
-  /// A [ValueNotifier] that holds the current list of shapes.
   final ValueNotifier<List<Shape>> _shapes = ValueNotifier<List<Shape>>([]);
-
-  /// The [AnimationController] that drives the shape animations.
   late AnimationController _animationController;
-
-  /// A [Random] instance for generating random properties of shapes.
   final Random _random = Random();
-
-  /// Tracks the last update time to calculate delta time for animations.
   DateTime _lastUpdateTime = DateTime.now();
-
-  /// Indicates whether the widget has been disposed to prevent further updates.
   bool _isDisposed = false;
 
-  /// Initializes the animation controller and starts generating shapes.
   @override
   void initState() {
     super.initState();
@@ -104,7 +80,6 @@ class FloatingAnimationState extends State<FloatingAnimation>
     _generateShape();
   }
 
-  /// Disposes the animation controller and notifier to free resources.
   @override
   void dispose() {
     _isDisposed = true;
@@ -113,32 +88,43 @@ class FloatingAnimationState extends State<FloatingAnimation>
     super.dispose();
   }
 
-  /// Generates a new shape and adds it to the list if the maximum is not reached.
-  ///
-  /// This method schedules itself to run again after a delay determined by [spawnRate],
-  /// creating a continuous stream of shapes being added.
+  /// Generates a new shape (with optional rotation and pulsing properties)
+  /// and adds it to the list if the maximum number hasn't been reached.
   void _generateShape() {
     if (_isDisposed) return;
 
     if (_shapes.value.length < widget.maxShapes) {
-      double depth = _random.nextDouble(); // Determines z-ordering
+      double depth = _random.nextDouble(); // Determines z-ordering.
       double speed = (0.2 - (0.15 * depth)) * widget.speedMultiplier;
       double opacity = 0.8 - (0.5 * depth);
-      double baseRadius =
-          _random.nextDouble() * 20 + 10; // Base size between 10 and 30
+      double baseRadius = _random.nextDouble() * 20 + 10; // Size between 10 and 30.
       double radius = baseRadius * widget.sizeMultiplier * (1 - depth * 0.5);
-
-      // Determine the starting y position based on the direction
+      // Start at bottom (for upward motion) or top (for downward motion).
       double startY = widget.direction == FloatingDirection.up ? 1.0 : -0.1;
+
+      // Additional transformation properties.
+      double rotation = widget.enableRotation ? 0.0 : 0.0;
+      double angularSpeed = widget.enableRotation
+          ? (_random.nextDouble() * 0.25 * widget.rotationSpeedMultiplier) -
+          (0.125 * widget.rotationSpeedMultiplier)
+          : 0.0;
+      double pulsePhase = widget.enablePulse ? _random.nextDouble() * 2 * pi : 0.0;
+      double pulseFrequency = widget.enablePulse ? widget.pulseSpeed : 0.0;
 
       Shape newShape = Shape(
         x: _random.nextDouble(),
-        y: startY, // Start at bottom or top
+        y: startY,
         radius: radius,
         speed: speed,
         opacity: opacity,
         depth: depth,
         shape: widget.selectedShape,
+        icon: widget.icon,
+        paintMethod: widget.customPaintMethod,
+        rotation: rotation,
+        angularSpeed: angularSpeed,
+        pulsePhase: pulsePhase,
+        pulseFrequency: pulseFrequency,
       );
 
       if (!_isDisposed) {
@@ -146,47 +132,43 @@ class FloatingAnimationState extends State<FloatingAnimation>
       }
     }
 
-    // Calculate the delay based on spawnRate
-    // spawnRate = shapes per second => delay between spawns = 1000ms / spawnRate
-    // Adding some randomness to the delay
+    // Determine delay between spawns (with a bit of randomness).
     double baseDelayMs = 1000.0 / widget.spawnRate;
-    // Random delay between 80% and 120% of baseDelayMs
     double randomFactor = 0.8 + _random.nextDouble() * 0.4;
     int delayMs = (baseDelayMs * randomFactor).round();
 
-    // Schedule the next shape addition after the calculated delay
-    Future.delayed(
-      Duration(milliseconds: delayMs),
-      _generateShape,
-    );
+    Future.delayed(Duration(milliseconds: delayMs), _generateShape);
   }
 
-  /// Updates the positions of all shapes based on their speed and elapsed time.
-  ///
-  /// Removes shapes that have moved off-screen based on the direction.
+  /// Updates the positions and transformation properties of all shapes.
+  /// Also removes shapes that have moved off-screen.
   void _updateShapes() {
     if (_isDisposed) return;
 
     DateTime now = DateTime.now();
     double deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
     _lastUpdateTime = now;
-
     if (deltaTime > 0.1) {
-      deltaTime = 0.1; // Cap deltaTime to prevent large jumps
+      deltaTime = 0.1;
     }
 
     List<Shape> updatedShapes = _shapes.value.map((shape) {
-      double newY;
+      double newY = widget.direction == FloatingDirection.up
+          ? shape.y - shape.speed * deltaTime
+          : shape.y + shape.speed * deltaTime;
 
-      if (widget.direction == FloatingDirection.up) {
-        // Move upwards
-        newY = shape.y - shape.speed * deltaTime;
-      } else {
-        // Move downwards
-        newY = shape.y + shape.speed * deltaTime;
+      double newRotation = shape.rotation;
+      if (widget.enableRotation) {
+        newRotation = shape.rotation + shape.angularSpeed * deltaTime;
       }
 
-      // Optionally, update rotation or other properties here
+      double newPulsePhase = shape.pulsePhase;
+      double newOpacity = shape.opacity;
+      if (widget.enablePulse) {
+        newPulsePhase = shape.pulsePhase + shape.pulseFrequency * deltaTime;
+        newOpacity = shape.baseOpacity + widget.pulseAmplitude * sin(newPulsePhase);
+        newOpacity = newOpacity.clamp(0.0, 1.0);
+      }
 
       return Shape(
         shape: shape.shape,
@@ -194,12 +176,19 @@ class FloatingAnimationState extends State<FloatingAnimation>
         y: newY,
         radius: shape.radius,
         speed: shape.speed,
-        opacity: shape.opacity,
+        opacity: newOpacity,
         depth: shape.depth,
+        icon: shape.icon,
+        paintMethod: shape.paintMethod,
+        rotation: newRotation,
+        angularSpeed: shape.angularSpeed,
+        baseOpacity: shape.baseOpacity,
+        pulsePhase: newPulsePhase,
+        pulseFrequency: shape.pulseFrequency,
       );
     }).toList();
 
-    // Remove shapes that have moved off-screen based on direction
+    // Remove shapes that have gone off-screen.
     if (widget.direction == FloatingDirection.up) {
       updatedShapes.removeWhere((shape) => shape.y < -0.1);
     } else {
@@ -211,10 +200,6 @@ class FloatingAnimationState extends State<FloatingAnimation>
     }
   }
 
-  /// Builds the widget tree with a [CustomPaint] widget to render shapes.
-  ///
-  /// Uses a [ValueListenableBuilder] to listen to changes in the shape list
-  /// and trigger repaints accordingly.
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
@@ -224,8 +209,7 @@ class FloatingAnimationState extends State<FloatingAnimation>
           return CustomPaint(
             painter: ShapePainter(
               shapes: shapes,
-              shapeColors:
-                  widget.shapeColors, // Pass the color map to the painter
+              shapeColors: widget.shapeColors,
             ),
             child: Container(),
           );

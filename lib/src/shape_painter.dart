@@ -1,140 +1,129 @@
-// shape_painter.dart
+// src/shape_painter.dart
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'shape.dart';
 
-/// A [CustomPainter] that draws a list of [Shape] instances on the canvas.
-///
-/// The [ShapePainter] class handles rendering different shapes based on their
-/// type. It supports drawing circles, rectangles, triangles, and hearts.
-/// Each shape is rendered with its specified color and opacity, adjusted based
-/// on depth to manage layering.
+/// A CustomPainter that draws a list of Shape instances on the canvas.
+/// It applies any rotation transformation specified on each Shape.
 class ShapePainter extends CustomPainter {
-  /// The list of shapes to be drawn.
   final List<Shape> shapes;
-
-  /// A map defining the color for each shape type.
-  ///
-  /// The key is the shape type as a string (e.g., 'circle', 'rectangle'),
-  /// and the value is the corresponding [Color].
-  /// If a shape type is not specified in this map, it defaults to [Colors.white].
   final Map<String, Color> shapeColors;
 
-  /// Constructs a [ShapePainter] with the given shapes and their colors.
-  ///
-  /// Both [shapes] and [shapeColors] are required and must not be null.
   ShapePainter({required this.shapes, required this.shapeColors});
 
-  /// Paints the shapes onto the given [canvas] within the provided [size].
-  ///
-  /// This method iterates through each shape, determines its type, and draws it
-  /// accordingly. The shapes are sorted based on their [depth] to ensure proper
-  /// layering, with deeper shapes drawn first.
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint();
 
-    // Sort shapes by depth to handle layering (background first)
+    // Sort shapes by depth (background first)
     List<Shape> drawingShapes = List.from(shapes)
       ..sort((a, b) => a.depth.compareTo(b.depth));
 
     for (Shape shape in drawingShapes) {
-      // Retrieve the color for the current shape type.
-      // Defaults to white if the shape type is not specified.
-      paint.color = (shapeColors[shape.shape] ?? Colors.white)
-          .withAlpha((shape.opacity * 255).toInt());
+      // Get the color for this shape (defaulting to white).
+      Color color = shapeColors[shape.shape ?? ''] ?? Colors.white;
+      paint.color = color.withAlpha((shape.opacity * 255).toInt());
 
-      // Calculate the actual position based on normalized coordinates.
+      // Calculate the actual center based on normalized coordinates.
       final double dx = shape.x * size.width;
       final double dy = shape.y * size.height;
+      final Offset center = Offset(dx, dy);
 
-      switch (shape.shape.toLowerCase()) {
-        case 'circle':
-          _drawCircle(canvas, Offset(dx, dy), shape.radius, paint);
-          break;
+      // Save canvas state, apply rotation if needed.
+      canvas.save();
+      canvas.translate(center.dx, center.dy);
+      canvas.rotate(shape.rotation);
+      canvas.translate(-center.dx, -center.dy);
 
-        case 'rectangle':
-          _drawRectangle(canvas, Offset(dx, dy), shape.radius, paint);
-          break;
-
-        case 'triangle':
-          _drawTriangle(canvas, Offset(dx, dy), shape.radius, paint);
-          break;
-
-        case 'heart':
-          _drawHeart(canvas, Offset(dx, dy), shape.radius, paint);
-          break;
-
-        default:
-          // Optionally handle unknown shapes
-          break;
+      // Custom drawing takes precedence.
+      if (shape.paintMethod != null) {
+        shape.paintMethod!(canvas, center, shape.radius, paint);
       }
+      // If an icon is provided, draw it.
+      else if (shape.icon != null) {
+        _drawIcon(canvas, center, shape.radius, paint, shape.icon!);
+      }
+      // Otherwise, draw the default shape.
+      else {
+        switch (shape.shape?.toLowerCase()) {
+          case 'circle':
+            _drawCircle(canvas, center, shape.radius, paint);
+            break;
+          case 'rectangle':
+            _drawRectangle(canvas, center, shape.radius, paint);
+            break;
+          case 'triangle':
+            _drawTriangle(canvas, center, shape.radius, paint);
+            break;
+          case 'heart':
+            _drawHeart(canvas, center, shape.radius, paint);
+            break;
+          default:
+            break;
+        }
+      }
+      canvas.restore();
     }
   }
 
-  /// Draws a circle on the [canvas] at the given [center] with the specified [radius].
-  ///
-  /// Uses the provided [paint] to render the circle.
   void _drawCircle(Canvas canvas, Offset center, double radius, Paint paint) {
     canvas.drawCircle(center, radius, paint);
   }
 
-  /// Draws a rectangle on the [canvas] at the given [topLeft] position with the specified [size].
-  ///
-  /// The [size] parameter is used for both width and height, making it a square.
-  /// Use different logic if you need non-square rectangles.
-  void _drawRectangle(Canvas canvas, Offset topLeft, double size, Paint paint) {
-    canvas.drawRect(Rect.fromLTWH(topLeft.dx, topLeft.dy, size, size), paint);
+  void _drawRectangle(Canvas canvas, Offset center, double size, Paint paint) {
+    canvas.drawRect(
+      Rect.fromCenter(center: center, width: size, height: size),
+      paint,
+    );
   }
 
-  /// Draws a triangle on the [canvas] at the given [center] with the specified [size].
-  ///
-  /// The triangle is an equilateral triangle pointing upwards.
   void _drawTriangle(Canvas canvas, Offset center, double size, Paint paint) {
     Path path = Path();
     double height = size * sqrt(3) / 2;
-
     path.moveTo(center.dx, center.dy - (2 / 3) * height);
     path.lineTo(center.dx - size / 2, center.dy + (height / 3));
     path.lineTo(center.dx + size / 2, center.dy + (height / 3));
     path.close();
-
     canvas.drawPath(path, paint);
   }
 
-  /// Draws a heart shape on the [canvas] at the given [center] with the specified [size].
-  ///
-  /// The heart is drawn using two cubic Bézier curves to form the left and right
-  /// lobes of the heart.
   void _drawHeart(Canvas canvas, Offset center, double size, Paint paint) {
-    double width = size * 2.5; // Increased width for a wider heart
-    double height = size * 2; // Height remains the same
-
+    double width = size * 2.5;
+    double height = size * 2;
     Path path = Path();
     path.moveTo(center.dx, center.dy - height * 0.3);
-
-    // Left curve
     path.cubicTo(
-      center.dx - width * 0.4, center.dy - height * 0.5, // Control point 1
-      center.dx - width * 0.55, center.dy + height * 0.2, // Control point 2
-      center.dx, center.dy + height * 0.5, // End point
+      center.dx - width * 0.4, center.dy - height * 0.5,
+      center.dx - width * 0.55, center.dy + height * 0.2,
+      center.dx, center.dy + height * 0.5,
     );
-
-    // Right curve
     path.cubicTo(
-      center.dx + width * 0.55, center.dy + height * 0.2, // Control point 1
-      center.dx + width * 0.4, center.dy - height * 0.5, // Control point 2
-      center.dx, center.dy - height * 0.3, // End point
+      center.dx + width * 0.55, center.dy + height * 0.2,
+      center.dx + width * 0.4, center.dy - height * 0.5,
+      center.dx, center.dy - height * 0.3,
     );
-
     path.close();
-
     canvas.drawPath(path, paint);
   }
 
-  /// Determines whether the painter should repaint.
-  ///
-  /// Always returns `true` to repaint whenever the list of shapes changes.
+  void _drawIcon(Canvas canvas, Offset center, double radius, Paint paint, IconData icon) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontFamily: icon.fontFamily,
+          fontSize: radius * 2,
+          color: paint.color,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    Offset iconOffset = center - Offset(textPainter.width / 2, textPainter.height / 2);
+    textPainter.paint(canvas, iconOffset);
+  }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;

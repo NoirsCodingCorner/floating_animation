@@ -1,37 +1,27 @@
-/// Represents a drawable shape with various properties.
-///
-/// The [Shape] class encapsulates the characteristics required to render
-/// different shapes such as circles, rectangles, triangles, and hearts.
-/// Each shape has properties that determine its position, size, movement,
-/// appearance, and rendering order based on depth.
+// src/shape.dart
+
+import 'package:flutter/material.dart';
+
+/// Represents a drawable shape with various properties,
+/// including optional transformation values for rotation and pulsing.
 class Shape {
-  /// Normalized horizontal position (0.0 to 1.0) relative to the canvas width.
   double x;
-
-  /// Normalized vertical position (0.0 to 1.0) relative to the canvas height.
   double y;
-
-  /// Radius or size parameter for the shape.
-  /// For circles, it represents the radius.
-  /// For rectangles and other shapes, it can denote width, height, or other dimensions.
   double radius;
-
-  /// Normalized speed at which the shape moves upwards (units per second).
   double speed;
-
-  /// Opacity of the shape (0.0 fully transparent to 1.0 fully opaque).
   double opacity;
-
-  /// Depth of the shape determining its rendering order.
-  /// 0.0 represents the foreground, and 1.0 represents the background.
   double depth;
+  String? shape;
+  void Function(Canvas, Offset, double, Paint)? paintMethod;
+  IconData? icon;
 
-  /// Type of the shape (e.g., 'circle', 'rectangle', 'triangle', 'heart').
-  String shape;
+  // Additional transformation properties:
+  final double rotation;
+  final double angularSpeed;
+  final double baseOpacity;
+  final double pulsePhase;
+  final double pulseFrequency;
 
-  /// Constructs a [Shape] with the given properties.
-  ///
-  /// All properties are required and must be provided during instantiation.
   Shape({
     required this.x,
     required this.y,
@@ -39,6 +29,13 @@ class Shape {
     required this.speed,
     required this.opacity,
     required this.depth,
-    required this.shape,
-  });
+    this.shape,
+    this.paintMethod,
+    this.icon,
+    this.rotation = 0.0,
+    this.angularSpeed = 0.0,
+    double? baseOpacity,
+    this.pulsePhase = 0.0,
+    this.pulseFrequency = 0.0,
+  }) : baseOpacity = baseOpacity ?? opacity;
 }
