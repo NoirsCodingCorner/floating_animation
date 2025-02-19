@@ -2,7 +2,7 @@ Below is an updated version of your README with sections for the new icon and tr
 
 ---
 
-# Flutter Shape Background
+# Floating Animation Package
 
 A customizable Flutter package for creating animated and dynamic floating shapes as a background. Supports various shapes like circles, rectangles, triangles, and hearts with configurable properties like color, size, speed, direction, spawn rate, and opacity.
 
@@ -25,7 +25,9 @@ Here are some examples of how it works:
 
 ### Icon with Transformations
 
-![Icon with Transformations](https://github.com/user-attachments/assets/YOUR_NEW_GIF_URL_HERE)
+![ui_testarea2025-02-1910-47-59-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/f7c9a6c7-dcde-4015-9d3e-dcce7ae395bf)
+
+
 
 ---
 
@@ -53,7 +55,7 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floating_animation: ^1.0.7
+  floating_animation: ^1.0.8
 ```
 
 Then fetch the package by running:
