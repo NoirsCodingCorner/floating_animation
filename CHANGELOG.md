@@ -29,3 +29,11 @@ Updated the readme
 ## 1.0.7
 
 Made it click-through
+
+## 1.0.8
+
+Updated the usability
+
+## 1.0.9
+
+Update to performance and documentation

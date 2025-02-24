@@ -1,5 +1,3 @@
-Below is an updated version of your README with sections for the new icon and transformation features. You can update the gif URL below once you have your new asset ready.
-
 ---
 
 # Floating Animation Package
@@ -55,7 +53,7 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  floating_animation: ^1.0.8
+  floating_animation: ^1.0.9
 ```
 
 Then fetch the package by running:
@@ -297,8 +295,3 @@ If you encounter any issues or have questions, feel free to open an issue on the
 
 ---
 
-*Note: Replace `YOUR_NEW_GIF_URL_HERE` with the actual URL for your new demonstration gif once available.*
-
----
-
-Feel free to adjust any section as needed. Enjoy building with Flutter Shape Background!

@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'shape.dart';
 import 'shape_painter.dart';
 
-
-
 /// Enum to define the direction of floating shapes.
 enum FloatingDirection { up, down }
 
-/// A StatefulWidget that manages and animates a background of floating shapes.
-/// In addition to basic movement, it can optionally rotate and pulse the shapes.
+/// A [StatefulWidget] that manages and animates a background of floating shapes.
+/// Shapes can be configured to optionally rotate and pulse.
 class FloatingAnimation extends StatefulWidget {
   final int maxShapes;
   final double speedMultiplier;
@@ -30,6 +28,7 @@ class FloatingAnimation extends StatefulWidget {
   final double pulseSpeed;
   final double pulseAmplitude;
 
+  /// Creates a [FloatingAnimation] widget.
   const FloatingAnimation({
     super.key,
     this.maxShapes = 50,
@@ -57,6 +56,7 @@ class FloatingAnimation extends StatefulWidget {
   FloatingAnimationState createState() => FloatingAnimationState();
 }
 
+/// State class for [FloatingAnimation] that handles shape creation, updating, and painting.
 class FloatingAnimationState extends State<FloatingAnimation>
     with SingleTickerProviderStateMixin {
   final ValueNotifier<List<Shape>> _shapes = ValueNotifier<List<Shape>>([]);
@@ -85,8 +85,11 @@ class FloatingAnimationState extends State<FloatingAnimation>
     super.dispose();
   }
 
-  /// Generates a new shape (with optional rotation and pulsing properties)
-  /// and adds it to the list if the maximum number hasn't been reached.
+  /// Generates a new shape with optional rotation and pulsing properties.
+  ///
+  /// If the current number of shapes is less than [widget.maxShapes], a new [Shape]
+  /// is created and added to the animation. The method schedules itself to run again
+  /// after a randomized delay based on [widget.spawnRate].
   void _generateShape() {
     if (_isDisposed) return;
 
@@ -100,12 +103,13 @@ class FloatingAnimationState extends State<FloatingAnimation>
       double startY = widget.direction == FloatingDirection.up ? 1.0 : -0.1;
 
       // Additional transformation properties.
-      double rotation = widget.enableRotation ? 0.0 : 0.0;
+      double rotation = 0.0;
       double angularSpeed = widget.enableRotation
           ? (_random.nextDouble() * 0.25 * widget.rotationSpeedMultiplier) -
           (0.125 * widget.rotationSpeedMultiplier)
           : 0.0;
-      double pulsePhase = widget.enablePulse ? _random.nextDouble() * 2 * pi : 0.0;
+      double pulsePhase =
+      widget.enablePulse ? _random.nextDouble() * 2 * pi : 0.0;
       double pulseFrequency = widget.enablePulse ? widget.pulseSpeed : 0.0;
 
       Shape newShape = Shape(
@@ -125,6 +129,7 @@ class FloatingAnimationState extends State<FloatingAnimation>
       );
 
       if (!_isDisposed) {
+        // Create a new list instance to update the ValueNotifier.
         _shapes.value = [..._shapes.value, newShape];
       }
     }
@@ -138,58 +143,69 @@ class FloatingAnimationState extends State<FloatingAnimation>
   }
 
   /// Updates the positions and transformation properties of all shapes.
-  /// Also removes shapes that have moved off-screen.
+  ///
+  /// Each shape's vertical position, rotation, and pulsing (opacity) are updated
+  /// based on the elapsed time since the last frame. Shapes that have moved off-screen
+  /// are filtered out. Common widget parameters are cached locally to improve performance.
   void _updateShapes() {
     if (_isDisposed) return;
 
-    DateTime now = DateTime.now();
-    double deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
-    _lastUpdateTime = now;
-    if (deltaTime > 0.1) {
-      deltaTime = 0.1;
-    }
+    // Cache widget parameters to reduce property lookups.
+    final FloatingDirection currentDirection = widget.direction;
+    final bool enableRotation = widget.enableRotation;
+    final bool enablePulse = widget.enablePulse;
+    final double pulseAmplitude = widget.pulseAmplitude;
 
-    List<Shape> updatedShapes = _shapes.value.map((shape) {
-      double newY = widget.direction == FloatingDirection.up
+    final DateTime now = DateTime.now();
+    double deltaTime =
+        now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
+    // Clamp deltaTime to avoid large jumps.
+    deltaTime = deltaTime > 0.1 ? 0.1 : deltaTime;
+    _lastUpdateTime = now;
+
+    // Use a single loop to update shapes and filter out those off-screen.
+    final List<Shape> updatedShapes = [];
+    for (final shape in _shapes.value) {
+      double newY = currentDirection == FloatingDirection.up
           ? shape.y - shape.speed * deltaTime
           : shape.y + shape.speed * deltaTime;
 
       double newRotation = shape.rotation;
-      if (widget.enableRotation) {
-        newRotation = shape.rotation + shape.angularSpeed * deltaTime;
+      if (enableRotation) {
+        newRotation += shape.angularSpeed * deltaTime;
       }
 
       double newPulsePhase = shape.pulsePhase;
       double newOpacity = shape.opacity;
-      if (widget.enablePulse) {
-        newPulsePhase = shape.pulsePhase + shape.pulseFrequency * deltaTime;
-        newOpacity = shape.baseOpacity + widget.pulseAmplitude * sin(newPulsePhase);
+      if (enablePulse) {
+        newPulsePhase += shape.pulseFrequency * deltaTime;
+        newOpacity =
+            shape.baseOpacity + pulseAmplitude * sin(newPulsePhase);
         newOpacity = newOpacity.clamp(0.0, 1.0);
       }
 
-      return Shape(
-        shape: shape.shape,
-        x: shape.x,
-        y: newY,
-        radius: shape.radius,
-        speed: shape.speed,
-        opacity: newOpacity,
-        depth: shape.depth,
-        icon: shape.icon,
-        paintMethod: shape.paintMethod,
-        rotation: newRotation,
-        angularSpeed: shape.angularSpeed,
-        baseOpacity: shape.baseOpacity,
-        pulsePhase: newPulsePhase,
-        pulseFrequency: shape.pulseFrequency,
-      );
-    }).toList();
-
-    // Remove shapes that have gone off-screen.
-    if (widget.direction == FloatingDirection.up) {
-      updatedShapes.removeWhere((shape) => shape.y < -0.1);
-    } else {
-      updatedShapes.removeWhere((shape) => shape.y > 1.1);
+      // Only add shapes that are still within the visible vertical bounds.
+      if ((currentDirection == FloatingDirection.up && newY >= -0.1) ||
+          (currentDirection == FloatingDirection.down && newY <= 1.1)) {
+        updatedShapes.add(
+          Shape(
+            shape: shape.shape,
+            x: shape.x,
+            y: newY,
+            radius: shape.radius,
+            speed: shape.speed,
+            opacity: newOpacity,
+            depth: shape.depth,
+            icon: shape.icon,
+            paintMethod: shape.paintMethod,
+            rotation: newRotation,
+            angularSpeed: shape.angularSpeed,
+            baseOpacity: shape.baseOpacity,
+            pulsePhase: newPulsePhase,
+            pulseFrequency: shape.pulseFrequency,
+          ),
+        );
+      }
     }
 
     if (!_isDisposed) {
