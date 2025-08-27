@@ -37,3 +37,7 @@ Updated the usability
 ## 1.0.9
 
 Update to performance and documentation
+
+## 1.1.0
+
+Added support for custom pngs

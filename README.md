@@ -1,11 +1,13 @@
----
+
 
 # Floating Animation Package
 
 A customizable Flutter package for creating animated and dynamic floating shapes as a background. Supports various shapes like circles, rectangles, triangles, and hearts with configurable properties like color, size, speed, direction, spawn rate, and opacity.
 
-This widget also supports seamless state changes, allowing the shapes to adapt dynamically without disrupting the animation. For example, you can change the shape mid-program, and the widget will continue running smoothly with the newly selected shape.  
+This widget also supports seamless state changes, allowing the shapes to adapt dynamically without disrupting the animation. For example, you can change the shape mid-program, and the widget will continue running smoothly with the newly selected shape.
 Now with **icon support** and **additional transformations** such as slow rotation and pulsing opacity!
+
+**New in version 1.1.0:** You can now use **PNG images** (with transparency) as floating elements in addition to shapes and icons. This makes it possible to add custom graphics like snowflakes, leaves, stars, or any themed assets directly into your animations.
 
 Here are some examples of how it works:
 
@@ -23,27 +25,45 @@ Here are some examples of how it works:
 
 ### Icon with Transformations
 
-![ui_testarea2025-02-1910-47-59-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/f7c9a6c7-dcde-4015-9d3e-dcce7ae395bf)
-
-
+![ui\_testarea2025-02-1910-47-59-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/f7c9a6c7-dcde-4015-9d3e-dcce7ae395bf)
 
 ---
 
 ## Features
 
-- **Multiple Shape Types**: Circle, rectangle, triangle, heart, and more.
-- **Icon Support**: Easily display custom icons instead of shapes.
-- **Customizable Colors**: Define unique colors for each shape or icon.
-- **Dynamic Animations**: Shapes and icons float with customizable speed, size, and direction.
-- **Layered Depth**: Shapes render in layers based on their depth value.
-- **Seamless Transitions**: Change properties on-the-fly without interrupting the animation.
-- **Adjustable Size**: Control the size of shapes using a size multiplier.
-- **Floating Direction**: Specify the direction in which shapes float (e.g., up, down, left, right).
-- **Spawn Rate Control**: Set the rate at which new shapes are spawned.
-- **Additional Transformations**:
-    - **Rotation**: Slowly rotate shapes or icons for extra flair.
-    - **Pulsing Opacity**: Make shapes or icons gently pulse in opacity.
-- **Scalable Design**: Automatically adjusts to different screen sizes.
+* **Multiple Shape Types**: Circle, rectangle, triangle, heart, and more.
+* **Icon Support**: Easily display custom icons instead of shapes.
+* **PNG Image Support (NEW in 1.1.0)**: Use any transparent PNG as a floating element.
+* **Customizable Colors**: Define unique colors for each shape or icon.
+* **Dynamic Animations**: Shapes and icons float with customizable speed, size, and direction.
+* **Layered Depth**: Shapes render in layers based on their depth value.
+* **Seamless Transitions**: Change properties on-the-fly without interrupting the animation.
+* **Adjustable Size**: Control the size of shapes using a size multiplier.
+* **Floating Direction**: Specify the direction in which shapes float (e.g., up, down, left, right).
+* **Spawn Rate Control**: Set the rate at which new shapes are spawned.
+* **Additional Transformations**:
+
+  * **Rotation**: Slowly rotate shapes or icons for extra flair.
+  * **Pulsing Opacity**: Make shapes or icons gently pulse in opacity.
+* **Scalable Design**: Automatically adjusts to different screen sizes.
+
+---
+
+## Installation
+
+Add the following line to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  floating_animation: ^1.1.0
+```
+
+Then fetch the package by running:
+
+```bash
+flutter pub get
+```
+
 
 ---
 
@@ -222,47 +242,32 @@ FloatingAnimation(
 )
 ```
 
----
 
-## Reference
+---
 
 ### FloatingAnimation Properties
 
-| Property                | Type                   | Default                   | Description                                                       |
-|-------------------------|------------------------|---------------------------|-------------------------------------------------------------------|
-| `maxShapes`             | `int`                  | `50`                      | Maximum number of shapes on the screen.                           |
-| `speedMultiplier`       | `double`               | `1.0`                     | Overall speed adjustment for the shapes.                          |
-| `sizeMultiplier`        | `double`               | `1.0`                     | Scales the size of the shapes.                                    |
-| `selectedShape`         | `String`               | `'circle'`                | Type of shape to generate (or `'icon'` for icons).                  |
-| `shapeColors`           | `Map<String, Color>`   | See example above         | Defines colors for each shape type or icon.                       |
-| `direction`             | `FloatingDirection`    | `FloatingDirection.up`    | Direction in which shapes float.                                  |
-| `spawnRate`             | `double`               | `10.0` shapes per second   | Frequency at which shapes are spawned.                            |
-| `icon`                  | `IconData?`            | `null`                    | Icon to display (overrides default shape drawing if provided).     |
-| `customPaintMethod`     | `Function?`            | `null`                    | Custom drawing callback for shapes/icons.                         |
-| `enableRotation`        | `bool`                 | `false`                   | Enables slow rotation transformation.                             |
-| `rotationSpeedMultiplier` | `double`            | `1.0`                     | Adjusts the rotation speed of shapes/icons.                       |
-| `enablePulse`           | `bool`                 | `false`                   | Enables pulsing opacity effect.                                   |
-| `pulseSpeed`            | `double`               | `2.0`                     | Speed of opacity pulsing oscillations.                            |
-| `pulseAmplitude`        | `double`               | `0.3`                     | Magnitude of the opacity pulsing.                                 |
-
-### Shape Properties
-
-| Property     | Type     | Description                                            |
-|--------------|----------|--------------------------------------------------------|
-| `x`          | `double` | Normalized horizontal position (0.0 to 1.0).           |
-| `y`          | `double` | Normalized vertical position (0.0 to 1.0).             |
-| `radius`     | `double` | Size of the shape.                                     |
-| `speed`      | `double` | Speed at which the shape floats.                       |
-| `opacity`    | `double` | Current opacity of the shape (0.0 to 1.0).             |
-| `depth`      | `double` | Depth for layered rendering (0.0 = foreground, 1.0 = background). |
-| `shape`      | `String` | Type of the shape (e.g., 'circle', 'rectangle', 'icon').|
-| `rotation`   | `double` | Current rotation angle (in radians).                   |
-| `angularSpeed`| `double`| Speed of rotation (radians per second).                |
-| `baseOpacity`| `double` | Base opacity used for pulsing calculations.            |
-| `pulsePhase` | `double` | Current phase for the pulsing effect.                  |
-| `pulseFrequency` | `double` | Frequency of the pulsing oscillation.              |
+| Property                  | Type                                       | Default                  | Description                                                                   |
+| ------------------------- | ------------------------------------------ | ------------------------ | ----------------------------------------------------------------------------- |
+| `maxShapes`               | `int`                                      | `50`                     | Maximum number of shapes/images/icons on the screen.                          |
+| `speedMultiplier`         | `double`                                   | `1.0`                    | Overall speed adjustment for shapes/images. Can also be changed at runtime.   |
+| `sizeMultiplier`          | `double`                                   | `1.0`                    | Scales the size of shapes/images. Can also be changed at runtime.             |
+| `selectedShape`           | `String`                                   | `'circle'`               | Type of the shape (e.g., `'circle'`, `'rectangle'`, `'heart'`, `'triangle'`). |
+| `shapeColors`             | `Map<String, Color>`                       | See example above        | Defines colors for shape types or icons.                                      |
+| `direction`               | `FloatingDirection` (`up`/`down`)          | `FloatingDirection.up`   | Direction in which shapes float.                                              |
+| `spawnRate`               | `double`                                   | `10.0` shapes per second | Frequency at which new shapes are spawned.                                    |
+| `icon`                    | `IconData?`                                | `null`                   | Icon to display (overrides shape if provided).                                |
+| `image`                   | `ui.Image?`                                | `null`                   | PNG image to display (supports transparency, new in `1.1.0`).                 |
+| `customPaintMethod`       | `Function(Canvas, Offset, double, Paint)?` | `null`                   | Custom drawing callback for advanced control.                                 |
+| `enableRotation`          | `bool`                                     | `false`                  | Enables slow rotation transformation. Can be changed at runtime.              |
+| `rotationSpeedMultiplier` | `double`                                   | `1.0`                    | Adjusts rotation speed of shapes/icons/images. Can be changed at runtime.     |
+| `enablePulse`             | `bool`                                     | `false`                  | Enables pulsing opacity effect. Can be changed at runtime.                    |
+| `pulseSpeed`              | `double`                                   | `2.0`                    | Speed of opacity pulsing oscillations. Can be changed at runtime.             |
+| `pulseAmplitude`          | `double`                                   | `0.3`                    | Magnitude of opacity pulsing. Can be changed at runtime.                      |
+| `useDepthOpacity`         | `bool`                                     | `true`                   | Whether opacity decreases with depth. Can be changed at runtime.              |
 
 ---
+
 
 ## Example Use Cases
 

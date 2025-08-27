@@ -1,15 +1,12 @@
-// floating_animation.dart
-
 import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+
 import 'shape.dart';
 import 'shape_painter.dart';
 
-/// Enum to define the direction of floating shapes.
 enum FloatingDirection { up, down }
 
-/// A [StatefulWidget] that manages and animates a background of floating shapes.
-/// Shapes can be configured to optionally rotate and pulse.
 class FloatingAnimation extends StatefulWidget {
   final int maxShapes;
   final double speedMultiplier;
@@ -18,17 +15,19 @@ class FloatingAnimation extends StatefulWidget {
   final Map<String, Color> shapeColors;
   final FloatingDirection direction;
   final double spawnRate;
+
   final IconData? icon;
+  final ui.Image? image;
   final void Function(Canvas, Offset, double, Paint)? customPaintMethod;
 
-  // New transformation parameters:
   final bool enableRotation;
   final double rotationSpeedMultiplier;
   final bool enablePulse;
   final double pulseSpeed;
   final double pulseAmplitude;
 
-  /// Creates a [FloatingAnimation] widget.
+  final bool useDepthOpacity;
+
   const FloatingAnimation({
     super.key,
     this.maxShapes = 50,
@@ -44,30 +43,53 @@ class FloatingAnimation extends StatefulWidget {
     this.direction = FloatingDirection.up,
     this.spawnRate = 10.0,
     this.icon,
+    this.image,
     this.customPaintMethod,
     this.enableRotation = false,
     this.rotationSpeedMultiplier = 1.0,
     this.enablePulse = false,
     this.pulseSpeed = 2.0,
     this.pulseAmplitude = 0.3,
+    this.useDepthOpacity = true,
   });
 
   @override
   FloatingAnimationState createState() => FloatingAnimationState();
 }
 
-/// State class for [FloatingAnimation] that handles shape creation, updating, and painting.
 class FloatingAnimationState extends State<FloatingAnimation>
     with SingleTickerProviderStateMixin {
-  final ValueNotifier<List<Shape>> _shapes = ValueNotifier<List<Shape>>([]);
-  late AnimationController _animationController;
-  final Random _random = Random();
-  DateTime _lastUpdateTime = DateTime.now();
+  final _shapes = ValueNotifier<List<Shape>>([]);
+  late final AnimationController _animationController;
+  final _random = Random();
+
   bool _isDisposed = false;
+  DateTime _lastUpdateTime = DateTime.now();
+
+  // Mutable State Variables
+  late double speedMultiplier;
+  late double sizeMultiplier;
+  late bool enableRotation;
+  late double rotationSpeedMultiplier;
+  late bool enablePulse;
+  late double pulseSpeed;
+  late double pulseAmplitude;
+  late bool useDepthOpacity;
 
   @override
   void initState() {
     super.initState();
+
+    // Init local mutable config
+    speedMultiplier = widget.speedMultiplier;
+    sizeMultiplier = widget.sizeMultiplier;
+    enableRotation = widget.enableRotation;
+    rotationSpeedMultiplier = widget.rotationSpeedMultiplier;
+    enablePulse = widget.enablePulse;
+    pulseSpeed = widget.pulseSpeed;
+    pulseAmplitude = widget.pulseAmplitude;
+    useDepthOpacity = widget.useDepthOpacity;
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 60),
@@ -85,42 +107,35 @@ class FloatingAnimationState extends State<FloatingAnimation>
     super.dispose();
   }
 
-  /// Generates a new shape with optional rotation and pulsing properties.
-  ///
-  /// If the current number of shapes is less than [widget.maxShapes], a new [Shape]
-  /// is created and added to the animation. The method schedules itself to run again
-  /// after a randomized delay based on [widget.spawnRate].
   void _generateShape() {
     if (_isDisposed) return;
 
     if (_shapes.value.length < widget.maxShapes) {
-      double depth = _random.nextDouble(); // Determines z-ordering.
-      double speed = (0.2 - (0.15 * depth)) * widget.speedMultiplier;
-      double opacity = 0.8 - (0.5 * depth);
-      double baseRadius = _random.nextDouble() * 20 + 10; // Size between 10 and 30.
-      double radius = baseRadius * widget.sizeMultiplier * (1 - depth * 0.5);
-      // Start at bottom (for upward motion) or top (for downward motion).
-      double startY = widget.direction == FloatingDirection.up ? 1.0 : -0.1;
+      final depth = _random.nextDouble();
+      final speed = (0.2 - 0.15 * depth) * speedMultiplier;
+      final opacity = useDepthOpacity ? (0.8 - 0.5 * depth) : 1.0;
+      final baseRadius = _random.nextDouble() * 20 + 10;
+      final radius = baseRadius * sizeMultiplier * (1 - depth * 0.5);
+      final startY = widget.direction == FloatingDirection.up ? 1.0 : -0.1;
 
-      // Additional transformation properties.
-      double rotation = 0.0;
-      double angularSpeed = widget.enableRotation
-          ? (_random.nextDouble() * 0.25 * widget.rotationSpeedMultiplier) -
-          (0.125 * widget.rotationSpeedMultiplier)
+      final rotation = 0.0;
+      final angularSpeed = enableRotation
+          ? (_random.nextDouble() * 0.25 - 0.125) * rotationSpeedMultiplier
           : 0.0;
-      double pulsePhase =
-      widget.enablePulse ? _random.nextDouble() * 2 * pi : 0.0;
-      double pulseFrequency = widget.enablePulse ? widget.pulseSpeed : 0.0;
 
-      Shape newShape = Shape(
+      final pulsePhase = enablePulse ? _random.nextDouble() * 2 * pi : 0.0;
+      final pulseFrequency = enablePulse ? pulseSpeed : 0.0;
+
+      final newShape = Shape(
+        shape: widget.selectedShape,
         x: _random.nextDouble(),
         y: startY,
         radius: radius,
         speed: speed,
         opacity: opacity,
         depth: depth,
-        shape: widget.selectedShape,
         icon: widget.icon,
+        image: widget.image,
         paintMethod: widget.customPaintMethod,
         rotation: rotation,
         angularSpeed: angularSpeed,
@@ -128,97 +143,79 @@ class FloatingAnimationState extends State<FloatingAnimation>
         pulseFrequency: pulseFrequency,
       );
 
-      if (!_isDisposed) {
-        // Create a new list instance to update the ValueNotifier.
-        _shapes.value = [..._shapes.value, newShape];
-      }
+      _shapes.value = [..._shapes.value, newShape];
     }
 
-    // Determine delay between spawns (with a bit of randomness).
-    double baseDelayMs = 1000.0 / widget.spawnRate;
-    double randomFactor = 0.8 + _random.nextDouble() * 0.4;
-    int delayMs = (baseDelayMs * randomFactor).round();
-
+    final delayMs = (1000.0 / widget.spawnRate * (0.8 + _random.nextDouble() * 0.4)).round();
     Future.delayed(Duration(milliseconds: delayMs), _generateShape);
   }
 
-  /// Updates the positions and transformation properties of all shapes.
-  ///
-  /// Each shape's vertical position, rotation, and pulsing (opacity) are updated
-  /// based on the elapsed time since the last frame. Shapes that have moved off-screen
-  /// are filtered out. Common widget parameters are cached locally to improve performance.
   void _updateShapes() {
     if (_isDisposed) return;
 
-    // Cache widget parameters to reduce property lookups.
-    final FloatingDirection currentDirection = widget.direction;
-    final bool enableRotation = widget.enableRotation;
-    final bool enablePulse = widget.enablePulse;
-    final double pulseAmplitude = widget.pulseAmplitude;
-
-    final DateTime now = DateTime.now();
-    double deltaTime =
-        now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
-    // Clamp deltaTime to avoid large jumps.
-    deltaTime = deltaTime > 0.1 ? 0.1 : deltaTime;
+    final now = DateTime.now();
+    var deltaTime = now.difference(_lastUpdateTime).inMilliseconds / 1000.0;
+    deltaTime = deltaTime.clamp(0.0, 0.1);
     _lastUpdateTime = now;
 
-    // Use a single loop to update shapes and filter out those off-screen.
-    final List<Shape> updatedShapes = [];
+    final updatedShapes = <Shape>[];
     for (final shape in _shapes.value) {
-      double newY = currentDirection == FloatingDirection.up
+      final newY = widget.direction == FloatingDirection.up
           ? shape.y - shape.speed * deltaTime
           : shape.y + shape.speed * deltaTime;
 
-      double newRotation = shape.rotation;
+      var newRotation = shape.rotation;
       if (enableRotation) {
         newRotation += shape.angularSpeed * deltaTime;
       }
 
-      double newPulsePhase = shape.pulsePhase;
-      double newOpacity = shape.opacity;
+      var newOpacity = shape.opacity;
+      var newPulsePhase = shape.pulsePhase;
       if (enablePulse) {
         newPulsePhase += shape.pulseFrequency * deltaTime;
-        newOpacity =
-            shape.baseOpacity + pulseAmplitude * sin(newPulsePhase);
-        newOpacity = newOpacity.clamp(0.0, 1.0);
+        newOpacity = (shape.baseOpacity + pulseAmplitude * sin(newPulsePhase)).clamp(0.0, 1.0);
       }
 
-      // Only add shapes that are still within the visible vertical bounds.
-      if ((currentDirection == FloatingDirection.up && newY >= -0.1) ||
-          (currentDirection == FloatingDirection.down && newY <= 1.1)) {
+      final isVisible = (widget.direction == FloatingDirection.up && newY >= -0.1) ||
+          (widget.direction == FloatingDirection.down && newY <= 1.1);
+
+      if (isVisible) {
         updatedShapes.add(
-          Shape(
-            shape: shape.shape,
-            x: shape.x,
+          shape.copyWith(
             y: newY,
-            radius: shape.radius,
-            speed: shape.speed,
-            opacity: newOpacity,
-            depth: shape.depth,
-            icon: shape.icon,
-            paintMethod: shape.paintMethod,
             rotation: newRotation,
-            angularSpeed: shape.angularSpeed,
-            baseOpacity: shape.baseOpacity,
+            opacity: newOpacity,
             pulsePhase: newPulsePhase,
-            pulseFrequency: shape.pulseFrequency,
           ),
         );
       }
     }
 
-    if (!_isDisposed) {
-      _shapes.value = updatedShapes;
-    }
+    _shapes.value = updatedShapes;
   }
+
+  // ------------------------------
+  // ✅ External Control Setters:
+  // ------------------------------
+
+  void setSpeedMultiplier(double value) => setState(() => speedMultiplier = value);
+  void setSizeMultiplier(double value) => setState(() => sizeMultiplier = value);
+  void setEnableRotation(bool value) => setState(() => enableRotation = value);
+  void setRotationSpeedMultiplier(double value) => setState(() => rotationSpeedMultiplier = value);
+  void setEnablePulse(bool value) => setState(() => enablePulse = value);
+  void setPulseSpeed(double value) => setState(() => pulseSpeed = value);
+  void setPulseAmplitude(double value) => setState(() => pulseAmplitude = value);
+  void setUseDepthOpacity(bool value) => setState(() => useDepthOpacity = value);
+
+  // Access shapes if needed
+  List<Shape> get currentShapes => _shapes.value;
 
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: ValueListenableBuilder<List<Shape>>(
         valueListenable: _shapes,
-        builder: (context, shapes, child) {
+        builder: (_, shapes, __) {
           return CustomPaint(
             painter: ShapePainter(
               shapes: shapes,
